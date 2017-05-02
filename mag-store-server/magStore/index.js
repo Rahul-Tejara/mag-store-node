@@ -31,6 +31,31 @@ connection.connect(function(err) {
 
 //// end data base connection here....
 
+router.get('/search', function (req,res) {
+        // fetch res value and send response based on UI res ....
+        var prduct_Name = req.query.prduct_Name;
+        console.log("tab name  "+ prduct_Name);
+        // console.log("res is from UI side" +  req.get('userid'));
+        if(prduct_Name){
+          prduct_Name = '%'+prduct_Name+'%';
+          var queryString = 'SELECT id, productTitle, productUrl, productColor, productPrice FROM magproduct_tbl where productCategory LIKE   ?';
+          connection.query(queryString, [prduct_Name], function(err, tabsData, fields) {
+              if (err){
+                 res.json({'status': 500, 'msg': err, 'tab_data': tabsData});
+                 throw err;
+              }
+               else{
+                  res.json({'status': 200, 'msg': 'success', 'tab_data': tabsData});
+              }
+        
+           });
+
+       } else {
+            res.json({'status': 500, 'msg': 'Tab ID is '+ tabName, 'tab_data': tabsData});
+       }// end if 
+
+        
+    });
 
 
 router.get('/tabcontains', function (req,res) {
@@ -55,23 +80,7 @@ router.get('/tabcontains', function (req,res) {
             res.json({'status': 500, 'msg': 'Tab ID is '+ tabName, 'tab_data': tabsData});
        }// end if 
 
-        // logic for reading Json file 
         
-        // var obj;
-        // var file  = './magStore/data.json';
-        // fs.readFile(file, 'utf8', function (err, data) {
-        //   if (err) {
-        //     console.log("error in json file reading");
-        //     // if json empty or any error please return status 500
-        //     throw err
-        //   };          
-        // var allTabsData = JSON.parse(data);
-        // // send product only for particular tab name 
-        // var tabsData = allTabsData[tabName];
-        // console.log(obj[tabName]);
-
-          // res.send(obj);
-        // });
     });
 
   
