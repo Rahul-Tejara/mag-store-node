@@ -3,7 +3,7 @@
 var express = require('express');
 var app = express();
 
-// import mysql packge
+
 var indexJs = require('./magStore/index');
 
 
@@ -13,16 +13,10 @@ app.use(function(req, res, next) {
   next();
 });
 
-// app.get('/', function(req, res, next) {
-//   // Handle the get for this route
-// });
 
-// app.post('/', function(req, res, next) {
-//  // Handle the post for this route
-// });
 
 app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+  console.log(' app listening on port 3000!');
 })
 
 // call to another files and we can hit the URLS Based on this /index

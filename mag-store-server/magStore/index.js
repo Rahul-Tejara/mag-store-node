@@ -3,15 +3,17 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
+var sendmail = require('sendmail')();
 
 
-// data base connection ...
-var mysql  = require('mysql');
+
 var bodyParser = require('body-parser')
-router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+router.use(bodyParser.urlencoded({  
   extended: true
   })); 
-        
+
+//  dababase connection
+var mysql  = require('mysql');
 
 var connection = mysql.createConnection({
   host     : 'localhost',
@@ -29,8 +31,8 @@ connection.connect(function(err) {
   console.log('connected as id ' + connection.threadId);
 });
 
-//// end data base connection here....
 
+// this is used for fethching product based on category s
 router.get('/search', function (req,res) {
         // fetch res value and send response based on UI res ....
         var prduct_Name = req.query.prduct_Name;
@@ -50,14 +52,14 @@ router.get('/search', function (req,res) {
         
            });
 
-       } else {
+       }else {
             res.json({'status': 500, 'msg': 'Tab ID is '+ tabName, 'tab_data': tabsData});
        }// end if 
 
         
     });
 
-
+// fetch  product contaion from DB based on tabname
 router.get('/tabcontains', function (req,res) {
         // fetch res value and send response based on UI res ....
         var tabName = req.query.tabName;
@@ -85,7 +87,7 @@ router.get('/tabcontains', function (req,res) {
 
   
 
-// fetch data from msql db ......//data base API 
+// insert add to cart item data into DB 
   router.post('/addtocart', function (req, res) {
       var queryString = 'INSERT INTO magcart_tbl (itemId, creatinTime, modificationTime, cartProductQuantity, updatedProductPrice)  select id, now(), now(), 1 , productPrice from magproduct_tbl where magproduct_tbl.id = ?;'
       var productId = req.body.productId;
@@ -114,7 +116,7 @@ router.get('/tabcontains', function (req,res) {
       
   });
 
- // defual callbind  total number of item in cart 
+ // default call bind  total number of item in cart 
 router.get('/displaytotalitem', function (req,res) {
         var queryString = 'select itemId from magcart_tbl';
         connection.query(queryString, function(err, totalItem_id, fields) {
@@ -129,8 +131,7 @@ router.get('/displaytotalitem', function (req,res) {
 
 });
 
-// its for display cart list item from DB 
-// defual callbind  total number of item in cart 
+// its for display cart list item from DB  
 router.get('/displayitemcart', function (req,res) {
         var queryString = 'select id, productUrl, productTitle, productColor, cartProductQuantity, updatedProductPrice from magproduct_tbl a, magcart_tbl b where a.id = b.itemId;';
         connection.query(queryString, function(err, itemList, fields) {
@@ -145,7 +146,7 @@ router.get('/displayitemcart', function (req,res) {
 
 });
 
- //
+ // this is used for quantity increse drese and remove product from cart list ...and update values in DB
   router.post('/quantity', function (req, res) {
       var queryString_fetchItem = 'select productPrice, cartProductQuantity, updatedProductPrice  from magproduct_tbl a, magcart_tbl b where a.id = b.itemId and b.itemId = ?;';
       var queryString_updateItem = 'UPDATE magcart_tbl SET modificationTime = now(), cartProductQuantity = ?, updatedProductPrice = ? where itemId = ?;';
@@ -212,6 +213,32 @@ router.get('/displayitemcart', function (req,res) {
        }// end if 
    
   });
+
+// send email 
+  router.post('/emailsubscribe', function (req, res) {
+      var queryString = 'INSERT INTO magcart_tbl (itemId, creatinTime, modificationTime, cartProductQuantity, updatedProductPrice)  select id, now(), now(), 1 , productPrice from magproduct_tbl where magproduct_tbl.id = ?;'
+      var email_addess = req.body.email_addess;
+      console.log("email_addess"+email_addess);
+      sendmail({
+        from: 'rahulptdr47@gmail.com',
+        to: email_addess,
+        replyTo: 'rahulptdr47gmail.com',
+        subject: 'Welcome mail for emailsubscribe',
+        html: 'Thanks for subscribe email in mag store'
+      }, function (err, reply) {
+        // console.log(err && err.stack)
+        // console.dir(reply)
+        res.json({'status': 200, 'msg': 'successfully emailsubscribe'});
+
+        
+
+      })
+      
+      
+  });
+
+
+ // 
 
 // export funciton 
 module.exports = router;
